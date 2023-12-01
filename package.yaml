@@ -35,9 +35,20 @@ ghc-options:
 
 library:
   source-dirs: src
+  dependencies:
+  - mtl
+  - split
+  - heredoc
+  - text
+  - containers
+  - time
+  - extra
+  - array
+  - unordered-containers
+  - parsec
 
 executables:
-  advent2023-exe:
+  advent2023:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
@@ -46,6 +57,8 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - advent2023
+    - mtl
+    - containers
 
 tests:
   advent2023-test:

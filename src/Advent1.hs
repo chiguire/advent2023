@@ -7,11 +7,6 @@ import Text.Heredoc
 import Data.Char
 import Data.List.Split
 
-import Text.Parsec
-import Text.Parsec.Char
-import Text.Parsec.String
-import Text.Parsec.Combinator (many1)
-
 -- Answers
 
 advent1_1 = sum $ map ((read :: (String -> Int)) . twoDigitNumber . filter isNumber) $ splitOn "\n" input

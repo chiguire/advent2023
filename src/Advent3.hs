@@ -3,10 +3,13 @@ module Advent3
     ( advent3_1, advent3_2
     ) where
 
+import Control.Arrow
+
 import Text.Heredoc
 
 import Data.Char (isDigit)
 import Data.Array
+import Data.List (groupBy)
 import Data.List.Split (splitOn, split, dropDelims, dropBlanks, whenElt)
 import Data.List.Extra (sortOn)
 
@@ -16,7 +19,7 @@ advent3_1 = sum . map (getPartNumber) $ filter (isPartValid (getMap theSchema)) 
     where
         theSchema = getSchema input
 
-advent3_2 = 0
+advent3_2 = sum . map (foldr (*) 1 . map (\(p,_,_) -> p)) $ matchParts $ getSchema input
 
 getSchema :: String -> Schema
 getSchema ipt = Schema { getParts = findParts theArray, getMap = theArray }
@@ -28,6 +31,19 @@ getSchema ipt = Schema { getParts = findParts theArray, getMap = theArray }
         flattenedList = foldr (++) [] transposedList
 
 -- Data types
+
+matchParts sch = findNeighbouringSymbol arr p
+    where
+        arr = getMap sch
+        p = getParts sch
+
+findNeighbouringSymbol arr prts = filter ((> 1) . length)
+                                  . groupBy (\(_, n1, s1) (_, n2, s2) -> (n1 == n2) && (s1 == s2))
+                                  . sortOn (\(_,n,_) -> n)
+                                  . map (\(p, n) -> (getPartNumber p, head n, arr ! (head n)))
+                                  . filter (not . null . snd)
+                                  . map (id &&& filter (isPartSymbolAtPosition arr) . getNeighbours)
+                                  $ prts
 
 isPartValid arr p = any (isPartSymbolAtPosition arr) $ getNeighbours p
 

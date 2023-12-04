@@ -5,18 +5,58 @@ module Advent4
 
 import Text.Heredoc
 
+import Text.Parsec (try, eof, (<|>), parse)
+import Text.Parsec.Char (char, endOfLine, anyChar, string, digit, spaces)
+import Text.Parsec.String
+import Text.Parsec.Combinator (many1, manyTill)
+
+import Data.List (intersect)
+import Data.List.Split (split, dropDelims, dropBlanks, oneOf)
+
 -- Answers
 
-advent4_1 = 0
+advent4_1 =     sum
+            .   map ((\x -> (2 ^ (x - 1))) . length) 
+            .   filter (not . null) 
+            .   map (matchingNumbers) 
+            <$> parse parseInput "advent4_1" input
 
 advent4_2 = 0
 
+-- Functions
+
+matchingNumbers c = (getWinningNumbers c) `intersect` (getHaveNumbers c)
+
 -- Parser
 
+parseInput :: Parser [Card]
+parseInput = do
+    cards <- many1 parseCard
+    return cards
+
+parseCard :: Parser Card
+parseCard = do
+    string "Card"
+    spaces
+    cardId <- read <$> many1 digit
+    string ": "
+    winningNumbers <- parseNumberList1
+    haveNumbers <- parseNumberList2
+    return Card { getCardID = cardId, getWinningNumbers = winningNumbers, getHaveNumbers = haveNumbers }
+
+parseNumberList1 :: Parser [Int]
+parseNumberList1 = do
+    numberLine <- manyTill anyChar (char '|')
+    return $ map (read) $ split (dropDelims . dropBlanks $ oneOf " ") numberLine
+
+parseNumberList2 :: Parser [Int]
+parseNumberList2 = do
+    numberLine <- manyTill anyChar (endOfLine <|> (eof >> return ' '))
+    return $ map (read) $ split (dropDelims . dropBlanks $ oneOf " ") numberLine
 
 -- Data Type
 
-data Card = Card { getCardID :: Int, getWinningNumbers :: [Int], getHaveNumbers :: [Int] }
+data Card = Card { getCardID :: Int, getWinningNumbers :: [Int], getHaveNumbers :: [Int] } deriving Show
 
 -- Input
 

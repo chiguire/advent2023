@@ -21,11 +21,24 @@ advent4_1 =     sum
             .   map (matchingNumbers) 
             <$> parse parseInput "advent4_1" input
 
-advent4_2 = 0
+advent4_2 = do
+    cards <- parse parseInput "advent4_2" input
+    let startingState = take (length cards) $ repeat 1
+    return $ sum $ processWinnings startingState cards
 
 -- Functions
 
+processWinnings [] [] = []
+processWinnings (st:xst) (c:xs) = (st : processWinnings newXst xs)
+    where
+        cardScore = length $ matchingNumbers c
+        newSums = take cardScore $ repeat st
+        newXst = sumList newSums xst
+
 matchingNumbers c = (getWinningNumbers c) `intersect` (getHaveNumbers c)
+
+sumList [] ys = ys
+sumList (x:xs) (y:ys) = ((x+y):sumList xs ys)
 
 -- Parser
 
